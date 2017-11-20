@@ -1,0 +1,6 @@
+.*
+!.gitignore
+!.keep
+
+config.yml
+
