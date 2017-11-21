@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 """
 Collect file date from backup folder and expose them to prometheus.io via http interface
+
 Note: the http interface is not protected so you should block it from outside using a firewall
+
 Usage: bkp_exporter.py [-p PORT] [-f CONF_FILE]
 """
+
 # Core libs
 import argparse
 import yaml
@@ -15,18 +18,26 @@ import os
 import Queue
 import threading
 import re
+
 # Third-party libs
 from prometheus_client import start_http_server, Metric, REGISTRY, Gauge
 from prometheus_client.core import GaugeMetricFamily
+
+
 # global consts
 DEFAULT_PORT = 9110
+
+
 # Custom Error
 class ExporterError(RuntimeError):
     pass
+
+
 class BkpCollector(object):
     """
     Main class, collecting data for prometheus client API
     """
+
     def __init__(self, conf):
         """
         Create the collector instance
@@ -36,8 +47,10 @@ class BkpCollector(object):
         super(BkpCollector, self).__init__()
         self._paths = {}
         self._rewrites = {}
-        self._metrics = {}
+        self._ts_metrics = {}
+        self._tz_metrics = {}
         self._parse_conf(conf)
+
     def collect(self):
         """
         check and look for data
@@ -63,11 +76,15 @@ class BkpCollector(object):
                 tags['filepath'] = filepath
                 frozen_tags = frozenset(tags.items())
                 if frozen_tags not in self._metrics.keys():
-                    self._metrics[frozen_tags] = GaugeMetricFamily("backup_file_timestamp", "Backup file timestamp", labels=sorted([x[0] for x in frozen_tags]))
+                    self._ts_metrics[frozen_tags] = GaugeMetricFamily("backup_file_timestamp", "Backup file timestamp", labels=sorted([x[0] for x in frozen_tags]))
+                    self._sz_metrics[frozen_tags] = GaugeMetricFamily("backup_file_size", "Backup file size", labels=sorted([x[0] for x in frozen_tags]))
                 modif_time = os.path.getmtime(filepath)
-                self._metrics[frozen_tags].add_metric([x[1] for x in sorted(frozen_tags, key=lambda y: y[0])], modif_time)
-                yield self._metrics[frozen_tags]
-        return
+                file_size = os.path.getsize(filesize)
+                self._ts_metrics[frozen_tags].add_metric([x[1] for x in sorted(frozen_tags, key=lambda y: y[0])], modif_time)
+                self._sz_metrics[frozen_tags].add_metric([x[1] for x in sorted(frozen_tags, key=lambda y: y[0])], file_size)
+                yield self._ts_metrics[frozen_tags]
+                yield self._sz_metrics[frozen_tags]
+
     def _parse_conf(self, conf):
         if 'locations' not in conf or not conf['locations']:
             raise ExporterError("no location defined")
@@ -83,6 +100,8 @@ class BkpCollector(object):
                 if not rewrite_conf:
                     continue
                 self._rewrites[var_name] = rewrite_conf
+
+
 def main(port, config_file=None):
     """
     Main function.
