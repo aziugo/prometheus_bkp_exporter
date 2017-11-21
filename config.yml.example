@@ -1,13 +1,12 @@
-last:
-  path: /home/backups/current
-  format: "(?P<server>[^_]+)_(.*)"
-
-past:
-  path: /home/backups/past
-  format: "(?P<date>[0-9]+)_(?P<server>[^_]+)_(.*)\.t?gz"
+locations:
+  last:
+    path: /home/backups/current
+  past:
+    path: /home/backups/past
+    format: '(?P<date>[0-9]+)_(?P<server>[^_]+)_(.*)\.t?gz'
 
 rewrite:
   server:
     bbb: bbb.example.com
-    bkp: bkp.example.com
+    wp: wordpress.example.com
 
