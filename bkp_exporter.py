@@ -18,6 +18,7 @@ import os
 import Queue
 import threading
 import re
+import socket
 
 # Third-party libs
 from prometheus_client import start_http_server, Metric, REGISTRY, Gauge
@@ -47,6 +48,7 @@ class BkpCollector(object):
         super(BkpCollector, self).__init__()
         self._paths = {}
         self._rewrites = {}
+        self._alive_metric = GaugeMetricFamily("ec2monitor_exporter_alive", "Ec2 Monitor Exporter Status", labels=['host'])
         self._ts_metrics = {}
         self._sz_metrics = {}
         self._parse_conf(conf)
@@ -56,6 +58,8 @@ class BkpCollector(object):
         check and look for data
         :yield:  GaugeMetricFamily
         """
+        self._alive_metric.add_metric([socket.getfqdn()], 1)
+        yield self._alive_metric
         for path_name, (path, format) in self._paths.iteritems():
             content_group_index = next(i+1 for i in range(format.groups) if i+1 not in format.groupindex.values())
             for file in os.listdir(path):
