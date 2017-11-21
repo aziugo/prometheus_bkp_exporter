@@ -48,7 +48,7 @@ class BkpCollector(object):
         self._paths = {}
         self._rewrites = {}
         self._ts_metrics = {}
-        self._tz_metrics = {}
+        self._sz_metrics = {}
         self._parse_conf(conf)
 
     def collect(self):
