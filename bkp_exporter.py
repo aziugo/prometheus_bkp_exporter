@@ -75,7 +75,7 @@ class BkpCollector(object):
                 tags['file'] = value
                 tags['filepath'] = filepath
                 frozen_tags = frozenset(tags.items())
-                if frozen_tags not in self._metrics.keys():
+                if frozen_tags not in self._ts_metrics.keys():
                     self._ts_metrics[frozen_tags] = GaugeMetricFamily("backup_file_timestamp", "Backup file timestamp", labels=sorted([x[0] for x in frozen_tags]))
                     self._sz_metrics[frozen_tags] = GaugeMetricFamily("backup_file_size", "Backup file size", labels=sorted([x[0] for x in frozen_tags]))
                 modif_time = os.path.getmtime(filepath)
