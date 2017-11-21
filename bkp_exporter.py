@@ -79,7 +79,7 @@ class BkpCollector(object):
                     self._ts_metrics[frozen_tags] = GaugeMetricFamily("backup_file_timestamp", "Backup file timestamp", labels=sorted([x[0] for x in frozen_tags]))
                     self._sz_metrics[frozen_tags] = GaugeMetricFamily("backup_file_size", "Backup file size", labels=sorted([x[0] for x in frozen_tags]))
                 modif_time = os.path.getmtime(filepath)
-                file_size = os.path.getsize(filesize)
+                file_size = os.path.getsize(filepath)
                 self._ts_metrics[frozen_tags].add_metric([x[1] for x in sorted(frozen_tags, key=lambda y: y[0])], modif_time)
                 self._sz_metrics[frozen_tags].add_metric([x[1] for x in sorted(frozen_tags, key=lambda y: y[0])], file_size)
                 yield self._ts_metrics[frozen_tags]
